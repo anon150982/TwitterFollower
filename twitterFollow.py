@@ -1,4 +1,4 @@
-import tweepy, os, sys
+import tweepy, os, sys, time
 
 #Twitter API credentials
 
@@ -16,10 +16,19 @@ txt = "list.txt"
 with open(txt) as f:
     content = f.readlines()
 
-for user in tweepy.Cursor(api.followers, screen_name=content).items():
+c = tweepy.Cursor(api.followers,scren_name=content).items()
 
-    print user.screen_name
-    content = "%s\n" % user.screen_name
-    fo.write(content);
+while True:
+    try:
+        user = c.next()
+        print user.screen_name
+        content = "%s\n" % user.screen_name
+        fo.write(content);
+    except tweepy.TweepError:
+        print "Tweepy Rate Limit exceeded, waiting for 15 min..."
+        time.sleep(60 * 15)
+        continue
+    except StopIteration:
+        break
 
 fo.close()
